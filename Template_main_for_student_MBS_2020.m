@@ -12,10 +12,18 @@ global data % Global structure that contains all the data (data.m, data.d, data.
 
 % Initial conditions for the time simulation(q and qdot at t = 0 sec)
 % Example for a 3 dof MBS
-
+data.N = 2;
+data.inbody = [0, 1];
+data.g = [0; 0; -9.81];
+data.joint_type = ["R2", "T3"];
 data.q = [0.01; 0.02; 0.03]; % funny values
 data.qd = [0.0; 0.0; 0.0]; % ...
 
+syms q1 q2 q3 qd1 qd2 qd3;
+q = [q1, q2, q3];
+qd = [qd1, qd2, qd3];
+
+[M, c] = dirdyn(q, qd, data);
 % Variable substitution for an order-1 integrator (ode45)
 
 y0 = [data.q; data.qd];
