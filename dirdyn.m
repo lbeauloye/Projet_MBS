@@ -1,7 +1,8 @@
 function [M, c] = dirdyn(q, qd, data)
 
 % Forward Kinematics
- 
+
+
 
 % Initial coniditions
 w = zeros(3, data.N);
@@ -19,9 +20,6 @@ for i = 1:data.N
 end
 
 
-
-
-
 % Backward Dynamics 
 
 
@@ -36,6 +34,5 @@ if(data.joint_type(i) == 1)
 else 
     R = 
 end
-
 
 end
