@@ -1,7 +1,8 @@
 function [M, c] = dirdyn(q, qd, data)
 
 % Forward Kinematics
- 
+
+
 
 % Allocation
 w = sym(zeros(3, data.N+1));
@@ -42,8 +43,6 @@ end
 
 
 % Backward Dynamics 
-
-
 
 
 end
@@ -92,6 +91,7 @@ end
 
 end
 
+
 function [u_tilde] = tilde(u)
 u_tilde = [0, -u(3), u(2); u(3), 0, -u(1); -u(2), u(1), 0];
 end 
@@ -99,3 +99,5 @@ end
 function [delta] = delta_kron(m,n)
 delta = (m==n);
 end
+
+
