@@ -11,8 +11,6 @@ beta_c = sym(zeros(3, 3, data.N+1));
 alpha_c = sym(zeros(3, data.N+1));
 O_M = sym(zeros(3,data.N+1, data.N+1));
 A_M =  sym(zeros(3,data.N+1, data.N+1));
-d = sym(zeros(3, data.N+1 , data.N+1));
-%d = data.d;
 
 % Initial coniditions
 
@@ -30,13 +28,13 @@ for i = 2:data.N+1
     wdot_c(:,i) = R_ih*wdot_c(:,h+1) + w_tilde_i*phi*qd(i-1);
     wdot_c_tilde_i = tilde(wdot_c(:,i));
     beta_c(:,:,i) = wdot_c_tilde_i + w_tilde_i*w_tilde_i;
-    alpha_c(:,i) = R_ih*(alpha_c(:,h+1) + beta_c(:,:,h+1)*(q(i-1)*psi + d(:,h+1, i))) ...
+    alpha_c(:,i) = R_ih*(alpha_c(:,h+1) + beta_c(:,:,h+1)*(q(i-1)*psi + data.d(:,h+1,i))) ...
         + 2*w_tilde_i*psi*qd(i-1);
     
     for k = 2:i
-        O_M(:,i,k) = R_ih*O_M(:,h+1,k) + delta_kron(k,i)*phi;
-        A_M(:,i,k) = R_ih*(A_M(:,h+1,k) + tilde(O_M(:,h+1,k))*(q(i-1)*psi + d(:,h+1,i))) ...
-            + delta_kron(k,i)*psi;
+        O_M(:,i,k) = R_ih*O_M(:,h+1,k) + delta_kron(k-1,i-1)*phi;
+        A_M(:,i,k) = R_ih*(A_M(:,h+1,k) + tilde(O_M(:,h+1,k))*(q(i-1)*psi + data.d(:,h+1,i))) ...
+            + delta_kron(k-1,i-1)*psi;
     end
     
 end
@@ -65,40 +63,38 @@ L_M = sym(zeros(3, data.N, data.N));
 for i = data.N:-1:1
     
     psi = Psi(data,i);
-%     size(alpha_c(:,i))
-%     size(W_c(:,i))
-%     size(beta_c(:,:,i))
-%     size(data.fext(:,i))
-    W_c(:,i) = data.m(i)*(alpha_c(:,i)+ beta_c(:,:,i)*(q(i)*psi + d(:,i,i))) ...
+    W_c(:,i) = data.m(i)*(alpha_c(:,i)+ beta_c(:,:,i)*(q(i)*psi + data.d(:,i+1,i+1))) ...
         - data.fext(:,i);
     children = find(data.inbody == i);
     for j = 1:length(children)
         F_c(:,i) = F_c(:,i) + Rot(data, children(j), q)*F_c(:,children(j));
         L_c(:,i) = L_c(:,i)+ Rot(data, children(j), q)*L_c(:,children(j)) ...
-            + tilde(q(i)*psi + d(:,i,i))*Rot(data, children(j), q)*F_c(:,children(j));
+            + tilde(q(i)*psi + data.d(:,i+1, children(j)+1))*Rot(data, children(j), q)*F_c(:,children(j));
     end 
     F_c(:,i) = F_c(:,i) + W_c(:,i);
-    L_c(:,i) = L_c(:,i) + tilde(q(i)*psi + d(:,i,i))*W_c(:,i) - data.lext(:,i) + ...
-        data.I(:,:,i)*wdot_c(:,i) + tilde(w(:,i))* data.I(:,:,i)*w(:,i);
+    L_c(:,i) = L_c(:,i) + tilde(q(i)*psi + data.d(:,i+1,i+1))*W_c(:,i) - data.lext(:,i) + ...
+        data.I(:,:,i)*wdot_c(:,i) + tilde(w(:,i))*data.I(:,:,i)*w(:,i);
     
     for k = 1:i
-        W_M(:,i,k) = data.m(i)*(A_M(:,i,k) + tilde(O_M(:,i,k))*(q(i)*psi + d(:,i,i)));
+        
+        W_M(:,i,k) = data.m(i)*(A_M(:,i,k) + tilde(O_M(:,i,k))*(q(i)*psi + data.d(:,i+1,i+1)));
         for j = 1:length(children)
             F_M(:,i,k) = F_M(:,i,k) + Rot(data, children(j), q)*F_M(:,children(j),k);
             L_M(:,i,k) = L_M(:,i,k) + Rot(data, children(j), q)*L_M(:,children(j),k) ...
-                + tilde(q(i)*psi + d(:,i,i))*Rot(data, children(j), q)*F_M(:,children(j),k);
+                + tilde(q(i)*psi + data.d(:,i+1,children(j)+1))*Rot(data, children(j), q)*F_M(:,children(j),k);
         end
         F_M(:,i,k) = F_M(:,i,k) + W_M(:,i,k);
-        L_M(:,i,k) = L_M(:,i,k) + tilde(q(i)*psi + d(:,i,i))*W_M(:,i,k) ...
+        L_M(:,i,k) = L_M(:,i,k) + tilde(q(i)*psi + data.d(:,i+1,i+1))*W_M(:,i,k) ...
             + data.I(:,:,i)*O_M(:,i,k);
     end
 end
 
 
 % Projection 
-c = sym(zeros(1, data.N));
+c = sym(zeros(data.N, 1));
 
 M = sym(zeros(data.N, data.N));
+
 
 for i = 1:data.N
     phi = Phi(data,i);
