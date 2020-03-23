@@ -5,47 +5,58 @@ function [M, c] = dirdyn(q, qd, data)
 
 
 % Allocation
-w = sym(zeros(3, data.N+1));
-wdot_c = sym(zeros(3, data.N+1));
-beta_c = sym(zeros(3, 3, data.N+1));
-alpha_c = sym(zeros(3, data.N+1));
-O_M = sym(zeros(3,data.N+1, data.N+1));
-A_M =  sym(zeros(3,data.N+1, data.N+1));
+w = sym(zeros(3, data.N));
+wdot_c = sym(zeros(3, data.N));
+beta_c = sym(zeros(3, 3, data.N));
+alpha_c = sym(zeros(3, data.N));
+O_M = sym(zeros(3,data.N, data.N));
+A_M =  sym(zeros(3,data.N, data.N));
 
 % Initial coniditions
 
-alpha_c(:,1) = -data.g;
+%alpha_c_0 = -data.g;
 
 % loops
 
-for i = 2:data.N+1 
-    h = data.inbody(i-1);
-    R_ih = Rot(data, i-1, q);
-    phi = Phi(data,i-1);
-    psi = Psi(data,i-1);
-    w(:,i) = R_ih*w(:,h+1) +  phi*qd(i-1);
-    w_tilde_i = tilde(w(:,i));
-    wdot_c(:,i) = R_ih*wdot_c(:,h+1) + w_tilde_i*phi*qd(i-1);
-    wdot_c_tilde_i = tilde(wdot_c(:,i));
-    beta_c(:,:,i) = wdot_c_tilde_i + w_tilde_i*w_tilde_i;
-    alpha_c(:,i) = R_ih*(alpha_c(:,h+1) + beta_c(:,:,h+1)*(q(i-1)*psi + data.d(:,h+1,i))) ...
-        + 2*w_tilde_i*psi*qd(i-1);
-    
-    for k = 2:i
-        O_M(:,i,k) = R_ih*O_M(:,h+1,k) + delta_kron(k-1,i-1)*phi;
-        A_M(:,i,k) = R_ih*(A_M(:,h+1,k) + tilde(O_M(:,h+1,k))*(q(i-1)*psi + data.d(:,h+1,i))) ...
-            + delta_kron(k-1,i-1)*psi;
+for i = 1:data.N
+    h = data.inbody(i);
+    R_ih = Rot(data,i,q);
+    phi = Phi(data,i);
+    psi = Psi(data,i);
+    if (h==0)
+        w(:,i) = phi*qd(i);
+        wdot_c(:,i) = tilde(w(:,i))*phi*qd(i);
+    else
+        w(:,i) = R_ih*w(:,h) + phi*qd(i);
+        wdot_c(:,i) = R_ih*wdot_c(h) + tilde(w(:,i))*phi*qd(i);
+    end
+    beta_c(:,:,i) = tilde(wdot_c(:,i)) + tilde(w(:,i))*tilde(w(:,i));
+    if (h==0)
+       alpha_c(:,i) = R_ih*(-data.g) + 2*tilde(w(:,i))*psi*qd(i);
+    else
+       alpha_c(:,i) = R_ih*(-data.g + beta_c(:,:,h)*(q(i)*psi+data.d(:,h,i))) ...
+           + 2*tilde(w(:,i))*psi*qd(i);
     end
     
+    for k = 1:i
+        if (h==0)
+           O_M(:,i,k) = delta_kron(k,i)*phi;
+           A_M(:,i,k) = delta_kron(k,i)*psi;
+        else
+           O_M(:,i,k) = R_ih*O_M(:,h,k) + delta_kron(k,i)*phi;
+           A_M(:,i,k) = R_ih*(A_M(:,h,k) + tilde(O_M(:,h,k))*(q(i)*psi+data.d(:,h,i))) ...
+              + delta_kron(k,i)*psi;
+        end
+    end    
 end
 
 
-alpha_c = alpha_c(:, 2:end);
-w = w(:,2:end);
-wdot_c = wdot_c(:,2:end);
-beta_c = beta_c(:,:,2:end);
-O_M = O_M(:,2:end, 2:end);
-A_M = A_M(:,2:end, 2:end);
+%alpha_c = alpha_c(:, 2:end);
+%w = w(:,2:end);
+%wdot_c = wdot_c(:,2:end);
+%beta_c = beta_c(:,:,2:end);
+%O_M = O_M(:,2:end, 2:end);
+%A_M = A_M(:,2:end, 2:end);
 
 
 % Backward Dynamics 
@@ -61,31 +72,30 @@ L_M = sym(zeros(3, data.N, data.N));
 
 
 for i = data.N:-1:1
-    
     psi = Psi(data,i);
-    W_c(:,i) = data.m(i)*(alpha_c(:,i)+ beta_c(:,:,i)*(q(i)*psi + data.d(:,i+1,i+1))) ...
+    W_c(:,i) = data.m(i)*(alpha_c(:,i) + beta_c(:,:,i)*(q(i)*psi+data.d(:,i,i))) ...
         - data.fext(:,i);
     children = find(data.inbody == i);
+    F_c(:,i) = W_c(:,i);
+    L_c(:,i) = tilde(q(i)*psi+data.d(:,i,i))*W_c(:,i) - data.lext(:,i) ...
+        + data.I(:,:,i)*wdot_c(:,i) + tilde(w(:,i))*data.I(:,:,i)*w(:,i);
     for j = 1:length(children)
-        F_c(:,i) = F_c(:,i) + Rot(data, children(j), q)*F_c(:,children(j));
-        L_c(:,i) = L_c(:,i)+ Rot(data, children(j), q)*L_c(:,children(j)) ...
-            + tilde(q(i)*psi + data.d(:,i+1, children(j)+1))*Rot(data, children(j), q)*F_c(:,children(j));
-    end 
-    F_c(:,i) = F_c(:,i) + W_c(:,i);
-    L_c(:,i) = L_c(:,i) + tilde(q(i)*psi + data.d(:,i+1,i+1))*W_c(:,i) - data.lext(:,i) + ...
-        data.I(:,:,i)*wdot_c(:,i) + tilde(w(:,i))*data.I(:,:,i)*w(:,i);
-    
+       R_ij = Rot(data,children(j),q);
+       F_c(:,i) = F_c(:,i) + R_ij*F_c(:,children(j));
+       L_c(:,i) = L_c(:,i) + R_ij*L_c(:,children(j)) ...
+           + tilde(q(i)*psi+data.d(:,i,children(j)))*R_ij*F_c(:,children(j));
+    end
+
     for k = 1:i
-        
-        W_M(:,i,k) = data.m(i)*(A_M(:,i,k) + tilde(O_M(:,i,k))*(q(i)*psi + data.d(:,i+1,i+1)));
+        W_M(:,i,k) = data.m(i) * (A_M(:,i,k)+tilde(O_M(:,i,k))*(q(i)*psi*data.d(:,i,i)));
+        F_M(:,i,k) = W_M(:,i,k);
+        L_M(:,i,k) = tilde(q(i)*psi+data.d(:,i,i))*W_M(:,i,k) + data.I(:,:,i)*O_M(:,i,k);
         for j = 1:length(children)
-            F_M(:,i,k) = F_M(:,i,k) + Rot(data, children(j), q)*F_M(:,children(j),k);
-            L_M(:,i,k) = L_M(:,i,k) + Rot(data, children(j), q)*L_M(:,children(j),k) ...
-                + tilde(q(i)*psi + data.d(:,i+1,children(j)+1))*Rot(data, children(j), q)*F_M(:,children(j),k);
+            R_ij = Rot(data,children(j),q);
+            F_M(:,i,k) = F_M(:,i,k) + R_ij*F_M(:,children(j),k);
+            L_M(:,i,k) = L_M(:,i,k) + R_ij*L_M(:,children(j),k) ...
+                + tilde(q(i)*psi+data.d(:,i,children(j)))*R_ij*F_M(:,children(j),k);
         end
-        F_M(:,i,k) = F_M(:,i,k) + W_M(:,i,k);
-        L_M(:,i,k) = L_M(:,i,k) + tilde(q(i)*psi + data.d(:,i+1,i+1))*W_M(:,i,k) ...
-            + data.I(:,:,i)*O_M(:,i,k);
     end
 end
 
@@ -158,5 +168,3 @@ end
 function [delta] = delta_kron(m,n)
 delta = (m==n);
 end
-
-
