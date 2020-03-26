@@ -28,13 +28,13 @@ for i = 1:data.N
         wdot_c(:,i) = tilde(w(:,i))*phi*qd(i);
     else
         w(:,i) = R_ih*w(:,h) + phi*qd(i);
-        wdot_c(:,i) = R_ih*wdot_c(h) + tilde(w(:,i))*phi*qd(i);
+        wdot_c(:,i) = R_ih*wdot_c(:,h) + tilde(w(:,i))*phi*qd(i);
     end
     beta_c(:,:,i) = tilde(wdot_c(:,i)) + tilde(w(:,i))*tilde(w(:,i));
     if (h==0)
-       alpha_c(:,i) = R_ih*(-data.g) + 2*tilde(w(:,i))*psi*qd(i);
+       alpha_c(:,i) = R_ih*(data.g) + 2*tilde(w(:,i))*psi*qd(i);
     else
-       alpha_c(:,i) = R_ih*(-data.g + beta_c(:,:,h)*(q(i)*psi+data.d(:,h,i))) ...
+       alpha_c(:,i) = R_ih*(alpha_c(:,h) + beta_c(:,:,h)*(q(i)*psi+data.d(:,h,i))) ...
            + 2*tilde(w(:,i))*psi*qd(i);
     end
     
@@ -49,7 +49,9 @@ for i = 1:data.N
         end
     end    
 end
-
+% 
+% O_M
+% A_M
 
 %alpha_c = alpha_c(:, 2:end);
 %w = w(:,2:end);
@@ -87,7 +89,11 @@ for i = data.N:-1:1
     end
 
     for k = 1:i
-        W_M(:,i,k) = data.m(i) * (A_M(:,i,k)+tilde(O_M(:,i,k))*(q(i)*psi*data.d(:,i,i)));
+%         i
+%         k
+%         A_M(:,i,k)
+%         tilde(O_M(:,i,k))*(q(i)*psi+data.d(:,i,i))
+        W_M(:,i,k) = data.m(i) * (A_M(:,i,k)+tilde(O_M(:,i,k))*(q(i)*psi+data.d(:,i,i)));
         F_M(:,i,k) = W_M(:,i,k);
         L_M(:,i,k) = tilde(q(i)*psi+data.d(:,i,i))*W_M(:,i,k) + data.I(:,:,i)*O_M(:,i,k);
         for j = 1:length(children)
@@ -112,8 +118,11 @@ for i = 1:data.N
     c(i) = psi'*F_c(:,i) + phi'*L_c(:,i);
     for j = 1:i
         M(i,j) = psi'*F_M(:,i,j) + phi'*L_M(:,i,j);
+        M(j,i) = M(i,j);
     end
 end
+
+
 
 end
 
@@ -166,5 +175,9 @@ u_tilde = [0, -u(3), u(2); u(3), 0, -u(1); -u(2), u(1), 0];
 end 
 
 function [delta] = delta_kron(m,n)
-delta = (m==n);
+if(m==n)
+    delta = 1;
+else 
+    delta = 0;
+end
 end
