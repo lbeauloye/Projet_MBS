@@ -19,7 +19,7 @@ syms d231 d232 d233 d221 d222 d223;
 data.N = 2;
 data.inbody = [0, 1];
 data.g = [0; 0; 9.81];
-data.joint_type = ["R2", "T3"];
+data.joint_type = ['R2', 'T3'];
 data.d = sym(zeros(3,data.N+1, data.N+1));
 data.d(:,2,3) = [0 0 d233]; % [0,0,0.5]; pour l'ex
 data.d(:,2,2) = [0 0 d223]; % [0,0,0.4]; pour l'ex
@@ -33,6 +33,7 @@ data.I(2,2,1) = I221; % 0.1 pour l'ex
 data.I(:,:,2) = sym(zeros(3,3));
 data.q = [1; 0.2]; % funny values
 data.qd = [0.0; 0.0]; % ...
+data.qdd = [0.0; 0.0];
 
 
 % TESTS A enlever pour integrer
@@ -40,7 +41,8 @@ syms q1 q2 q3 qd1 qd2 qd3;
 q = [q1, q2, q3];
 qd = [qd1, qd2, qd3];
 
-[M, c] = dirdyn(q, qd, data)
+%[M, c] = dirdyn(q, qd, data)
+[M, c] = dirdyn2(q, qd, data, t)
 
 subs(M, [m1, m2, d223, d233, q2, I221], [5, 2, 0.4, 0.5, 0.2, 0.1]),
 subs(c, [m1, m2, d223, d233, q2, q1, f12, f11, f23, l21, l22, qd1, qd2],  [5, 2, 0.4, 0.5, 0.2, 1, 0, 0, 0, 0, 0, 0, 0])

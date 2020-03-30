@@ -47,7 +47,7 @@ for i = 1:data.N
            A_M(:,i,k) = R_ih*(A_M(:,h,k) + tilde(O_M(:,h,k))*(q(i)*psi+data.d(:,h,i))) ...
               + delta_kron(k,i)*psi;
         end
-    end    
+    end
 end
 % 
 % O_M
