@@ -69,7 +69,7 @@ for i = 1:data.N
     PHI(i) = F(:,i)'*psi + L(:,i)'*phi;
     unit = eye(data.N);
     for k = 1:i
-        qddk = qdd.*(unit(:,k));
+        qddk = (unit(:,k));
         qdk = zeros(data.N, 1);
         
     end
