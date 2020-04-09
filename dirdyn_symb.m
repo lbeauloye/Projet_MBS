@@ -1,22 +1,33 @@
-function [M, c] = dirdyn(q, qd, data)
+function [M, c] = dirdyn_symb(q, qd, data)
 
 % Forward Kinematics
 
 
 
 % Allocation
-w = zeros(3, data.N);
-wdot_c = zeros(3, data.N);
-beta_c = zeros(3, 3, data.N);
-alpha_c = zeros(3, data.N);
-O_M = zeros(3,data.N, data.N);
-A_M =  zeros(3,data.N, data.N);
+w = sym(zeros(3, data.N));
+wdot_c = sym(zeros(3, data.N));
+beta_c = sym(zeros(3, 3, data.N));
+alpha_c = sym(zeros(3, data.N));
+O_M = sym(zeros(3,data.N, data.N));
+A_M =  sym(zeros(3,data.N, data.N));
+
+% d_ijz = zeros(3,data.N, data.N));
+% 
+% for i=1:data.N
+%     
+%     if(strcmp(data.joint_type(i),'T1') || strcmp(data.joint_type(i),'T2') || strcmp(data.joint_type(i),'T3'))
+%         d_ijz(:,i,j) = 
+% end
+% Initial coniditions
+
+%alpha_c_0 = -data.g;
 
 % loops
 
 for i = 1:data.N
     h = data.inbody(i);
-    R_ih = Rot(data,i,q)';
+    R_ih = Rot(data,i,q).';
     phi = Phi(data,i);
     psi = Psi(data,i);
     if (h==0)
@@ -43,7 +54,7 @@ for i = 1:data.N
            A_M(:,i,k) = R_ih*(A_M(:,h,k) + tilde(O_M(:,h,k))*(q(h)*Psi(data,h)+data.d(:,h,i))) ...
               + delta_kron(k,i)*psi;
         end
-        
+% %         
         if(k ~= i)
             O_M(:,k,i) = O_M(:,i,k);
             A_M(:,k,i) = A_M(:,i,k);
@@ -51,17 +62,32 @@ for i = 1:data.N
             
     end    
 end
+% 
+% O_M
+% A_M
+% alpha_c
+% w
+% wdot_c
+% beta_c
+
+%alpha_c = alpha_c(:, 2:end);
+%w = w(:,2:end);
+%wdot_c = wdot_c(:,2:end);
+%beta_c = beta_c(:,:,2:end);
+%O_M = O_M(:,2:end, 2:end);
+%A_M = A_M(:,2:end, 2:end);
+
 
 % Backward Dynamics 
 
 
 % Allocation 
-W_c = zeros(3, data.N);
-F_c = zeros(3, data.N);
-L_c = zeros(3, data.N);
-W_M = zeros(3, data.N, data.N);
-F_M = zeros(3, data.N, data.N);
-L_M = zeros(3, data.N, data.N);
+W_c = sym(zeros(3, data.N));
+F_c = sym(zeros(3, data.N));
+L_c = sym(zeros(3, data.N));
+W_M = sym(zeros(3, data.N, data.N));
+F_M = sym(zeros(3, data.N, data.N));
+L_M = sym(zeros(3, data.N, data.N));
 
 
 for i = data.N:-1:1
@@ -80,6 +106,10 @@ for i = data.N:-1:1
     end
 
     for k = 1:i
+%         i
+%         k
+%         A_M(:,i,k)
+%         tilde(O_M(:,i,k))*(q(i)*psi+data.d(:,i,i))
         W_M(:,i,k) = data.m(i) * (A_M(:,i,k)+tilde(O_M(:,i,k))*(q(i)*psi+data.d(:,i,i)));
         F_M(:,i,k) = W_M(:,i,k);
         L_M(:,i,k) = tilde(q(i)*psi+data.d(:,i,i))*W_M(:,i,k) + data.I(:,:,i)*O_M(:,i,k);
@@ -88,19 +118,25 @@ for i = data.N:-1:1
             F_M(:,i,k) = F_M(:,i,k) + R_ij*F_M(:,children(j),k);
             L_M(:,i,k) = L_M(:,i,k) + R_ij*L_M(:,children(j),k) ...
                 + tilde(q(i)*psi+data.d(:,i,children(j)))*R_ij*F_M(:,children(j),k);
-        end     
+        end
+%         
         if(k ~= i)
             W_M(:,k,i) = W_M(:,i,k);
             F_M(:,k,i) = F_M(:,i,k);
             L_M(:,k,i) = L_M(:,i,k);
-        end      
+        end
+%         
     end
 end
-
+% 
+% W_c
+% F_c
+% L_c
+% L_M
 % Projection 
-c = zeros(data.N, 1);
+c = sym(zeros(data.N, 1));
 
-M = zeros(data.N, data.N);
+M = sym(zeros(data.N, data.N));
 
 
 for i = 1:data.N
