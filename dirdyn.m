@@ -49,7 +49,7 @@ for i = 1:data.N
             A_M(:,k,i) = A_M(:,i,k);
         end
             
-    end    
+    end  
 end
 
 % Backward Dynamics 

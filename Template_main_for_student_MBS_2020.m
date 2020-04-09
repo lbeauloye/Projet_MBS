@@ -43,6 +43,7 @@ data.I(:,:,2) = zeros(3,3);
 % data.I(2,2,3) = I223;
 data.q = [1.0; 0.2]; % funny values
 data.qd = [0.0; 0.0]; % ...
+data.qdd = [0.0; 0.0];
 
 
 % % % TESTS A enlever pour integrer
@@ -77,7 +78,6 @@ data.qd = [0.0; 0.0]; % ...
 % double(subs(M2, [m1, m2, d113, d123, q2, I221, d121], [5, 2, 0.4, 0.5, 0.2, 0.1, 0]))
 % double(subs(c2, [m1, m2, d113, d123, q2, q1, f12, f11, f23, l21, l22, qd1, qd2, d121], ...
 %     [5, 2, 0.4, 0.5, data.q(2), data.q(1), 0, 0, 0, 0, 0, data.qd(1), data.qd(2), 0]))
-
 
 
 % Variable substitution for an order-1 integrator (ode45)
