@@ -55,10 +55,10 @@ for i = 1:data.N
               + delta_kron(k,i)*psi;
         end
 % %         
-        if(k ~= i)
-            O_M(:,k,i) = O_M(:,i,k);
-            A_M(:,k,i) = A_M(:,i,k);
-        end
+%         if(k ~= i)
+%             O_M(:,k,i) = O_M(:,i,k);
+%             A_M(:,k,i) = A_M(:,i,k);
+%         end
             
     end    
 end
@@ -120,11 +120,11 @@ for i = data.N:-1:1
                 + tilde(q(i)*psi+data.d(:,i,children(j)))*R_ij*F_M(:,children(j),k);
         end
 %         
-        if(k ~= i)
-            W_M(:,k,i) = W_M(:,i,k);
-            F_M(:,k,i) = F_M(:,i,k);
-            L_M(:,k,i) = L_M(:,i,k);
-        end
+%         if(k ~= i)
+%             W_M(:,k,i) = W_M(:,i,k);
+%             F_M(:,k,i) = F_M(:,i,k);
+%             L_M(:,k,i) = L_M(:,i,k);
+%         end
 %         
     end
 end
@@ -152,6 +152,8 @@ for i = 1:data.N
 end
 
 
+M = matlabFunction(M, 'Vars', {[q]});
+c = matlabFunction(c, 'Vars', {[q , qd]});
 
 end
 
