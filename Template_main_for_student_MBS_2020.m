@@ -7,7 +7,7 @@ if nargin == 0
 end
 
 test = input('Enter a number: ');
-global data % Global structure that contains all the data (data.m, data.d, data.g, ...)
+global data i % Global structure that contains all the data (data.m, data.d, data.g, ...)
 
 %[data] = load_data; % Loading of the data from the data file (up to you!)
 
@@ -169,8 +169,11 @@ y0 = [data.q(data.ind_u)' data.qd(data.ind_u)'];
 % Time integration
 % MBS model to be programmed in the external function :
 % yd = Template_fprime_for_student_MBS_2020(t,y)
+i = 1;
 
 tspan = [0:0.01:tmax];
+data.lambda = zeros(length(tspan), 1);
+data.t = zeros(length(tspan), 1);
 tic;
  options = odeset('RelTol',1e-6);
 [t, y] = ode45('Template_fprime_for_student_MBS_2020', tspan, y0, options);
@@ -187,11 +190,12 @@ time(1) = toc;
 % time(3) = toc;
 % Plot of results ...
 % 
+
 figure;
 subplot(2,1,1)
 plot(t, y(:,1));grid on;title('q R2');hold on;
 subplot(2,1,2)
-plot(result(:,1), result(:,3));grid on;title('q R2 Robotran');hold on;
+plot(data.t, data.lambda);grid on;title('q R2 Robotran');hold on;
 xlim([0 tmax]);
 
 % % % Happy end !

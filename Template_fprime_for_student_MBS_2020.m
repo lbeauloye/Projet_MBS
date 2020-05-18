@@ -1,6 +1,6 @@
 function [yp] = Template_fprime_for_student_MBS_2020(t, y)
 
-global data % global declaration required for the integrator (Matlab "limitation")
+global data i % global declaration required for the integrator (Matlab "limitation")
 
 % Variable substitution (from Integrator to MBS)
 
@@ -34,14 +34,22 @@ end
 F = Q - c;
 
 Fu = F(data.ind_u);
+Fc = F(data.ind_c);
 Muu = M(data.ind_u,data.ind_u);
 Muc = M(data.ind_u, data.ind_c);
+Mcu = M(data.ind_c, data.ind_u);
+Mcc = M(data.ind_c, data.ind_c);
+
+data.t(i) = t;
+data.lambda(i) = Mcu*data.qdd(data.ind_u) + Mcc*data.qdd(data.ind_c) + Fc;
+i = i + 1;
+
 % Variable substitution (from  MBS to Integrator)
 
 % yp(1:data.N) = y(data.N+1:end);
 % yp(3:4) = (M\F); % solution of linear system ("Ax = b")
 % figure(2);
-% plot(t, data.q(1), '*'); hold on
+% plot(t, Mcu*data.qdd(data.ind_u) + Mcc*data.qdd(data.ind_c) + Fc , '*'); hold on
 % drawnow;
 
 yp = [y(data.Nu+1:end) ; (Muu\(Fu-Muc*data.qdd(data.ind_c)))];
