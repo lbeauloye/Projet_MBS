@@ -7,16 +7,28 @@ global data i % global declaration required for the integrator (Matlab "limitati
 data.q(data.ind_u) = y(1:data.Nu);
 data.qd(data.ind_u) = y(data.Nu+1:end);
 
-data.q(data.ind_c) = t;
-data.qd(data.ind_c)= 1;
-data.qqd(data.ind_c) = 0.0;
+% Driven variables
+data.q(data.ind_c) = 0.0;
+data.qd(data.ind_c) = 0.0;
+data.qdd(data.ind_c) = 0.0;
 
+if(t<10)
+    data.q(data.ind_c(1)) = 0.1*t^2;
+    data.qd(data.ind_c(1)) = 0.1*t;
+    data.qdd(data.ind_c(1)) = 0.1;
+else
+    data.q(data.ind_c(1)) = (0.1*10^2)+(1.0*(t-10));
+    data.qd(data.ind_c(1)) = 0.1*10;
+    data.qdd(data.ind_c(1)) = 0.0;
+end
 % Q vector
 
 %[Q] = Joint_forces(data.q, data.qd, data); % up to you : function 'Joint_forces' to program (if needed)
 %size(data.q)
 
-Q = [0; -(100*(data.q(2) - 0.1) + 2*data.qd(2))]; % pour l'ex
+Q = zeros(data.N, 1);%[0;0];
+Q(4) = -(100*(data.q(4))+1000*data.qd(4)); %% Damping
+Q(3) = -(100*(data.q(3))+1000*data.qd(3)); %% Damping
 
 %Q = zeros(data.N, 1);%[0;0];
 
@@ -41,7 +53,7 @@ Mcu = M(data.ind_c, data.ind_u);
 Mcc = M(data.ind_c, data.ind_c);
 
 data.t(i) = t;
-data.lambda(i) = Mcu*data.qdd(data.ind_u) + Mcc*data.qdd(data.ind_c) + Fc;
+%data.lambda(i) = Mcu*data.qdd(data.ind_u) + Mcc*data.qdd(data.ind_c) + Fc;
 i = i + 1;
 
 % Variable substitution (from  MBS to Integrator)

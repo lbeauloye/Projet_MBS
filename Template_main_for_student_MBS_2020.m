@@ -17,7 +17,7 @@ global data i % Global structure that contains all the data (data.m, data.d, dat
 
 
 
-syms q1 q2 q3 q4 qd1 qd2 qd3 qd4;
+syms q1 q2 q3 q4 q5 q6 q7 q8 q9 qd1 qd2 qd3 qd4 qd5 qd6 qd7 qd8 qd9;
 
 
 switch test 
@@ -129,6 +129,56 @@ switch test
         data.qd_symb = [qd1; qd2; qd3; qd4];
         tmax = 10;
         result = load('/Users/LB/Documents/MBProjects/Test_4_body_M/resultsR/simdirq.res');
+    
+    case 5 %% Manege Validation parameters
+        
+        data.N = 9;
+        data.Nu = 4;
+        data.ind_u = [3 4 7 8];
+        data.ind_c = [1 2 5 6 9];
+        data.inbody = [0, 1, 2, 3, 4, 1, 6, 7, 8];
+        data.g = [0; 0; 9.81];
+        data.joint_type = ["R3","T1","R1","R2","T3","T1","R1","R2","T3"];
+        % Geometry
+        data.d = zeros(3,data.N, data.N);
+        data.d(:,1,1) = [0,0,-2.5];
+        data.d(:,1,2) = [-0.5,0,-5.0];
+        data.d(:,2,2) = [-1.5,0,0];
+        data.d(:,2,3) = [-3.0,0,0.15];
+        data.d(:,3,3) = [0,0,0];
+        data.d(:,3,4) = [0,0,0];
+        data.d(:,4,4) = [0,0,1.5];
+        data.d(:,4,5) = [0,0,3.0];
+        data.d(:,5,5) = [0,0,0];
+        data.d(:,1,6) = [0.5,0,5.0];
+        data.d(:,6,6) = [1.5,0,0];
+        data.d(:,6,7) = [3.0,0,0.15];
+        data.d(:,7,7) = [0,0,0];
+        data.d(:,7,8) = [0,0,0];
+        data.d(:,8,8) = [0,0,1.5];
+        data.d(:,8,9) = [0,0,3.0];
+        data.m = [1000, 200, 0, 5, 100, 200, 0, 5, 100];
+        % Fext
+        data.fext = zeros(3,9);
+        data.lext= zeros(3,9);
+        % Inertial matrices
+        data.I(:,:,1) = [2145 0 0; 0 2145 0; 0 0 125];
+        data.I(:,:,2) = [10.875 0 0; 0 151 0; 0 0 159];
+        data.I(:,:,3) = [0 0 0; 0 0 0; 0 0 0];
+        data.I(:,:,4) = [3.75 0 0; 0 3.75 0; 0 0 0];
+        data.I(:,:,5) = [data.m(4)*2/5 0 0; 0 data.m(4)*2/5 0; 0 0 data.m(4)*2/5];
+        data.I(:,:,6) = [10.875 0 0; 0 151 0; 0 0 159];
+        data.I(:,:,7) = [0 0 0; 0 0 0; 0 0 0];
+        data.I(:,:,8) = [3.75 0 0; 0 3.75 0; 0 0 0];
+        data.I(:,:,9) = [data.m(4)*2/5 0 0; 0 data.m(4)*2/5 0; 0 0 data.m(4)*2/5];
+        
+        data.q_symb = [q1; q2; q3; q4; q5; q6; q7; q8; q9];
+        data.qd_symb = [qd1; qd2; qd3; qd4; qd5; qd6; qd7; qd8; qd9];
+        data.q = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.4; 0.0]; 
+        data.qd = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0]; 
+        data.qdd = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0];
+        tmax = 25;
+        result = load('/Users/vermeulenlucas/Documents/MBProjects/Simple_manege/resultsR/dirdyn_q.res');
         
     otherwise 
         
@@ -193,16 +243,15 @@ time(1) = toc;
 
 figure;
 subplot(2,1,1)
-plot(t, y(:,1));grid on;title('q R2');hold on;
+plot(t, y(:,1)*180/pi,'b','Linewidth',2);grid on;title('q R1','Fontsize',14);hold on;
+xlabel('Time [s]','Fontsize',14)
+ylabel('q [°]','Fontsize',14);
 subplot(2,1,2)
-plot(data.t, data.lambda);grid on;title('q R2 Robotran');hold on;
+plot(t, y(:,2)*180/pi,'b','Linewidth',2);grid on;title('q R2','Fontsize',14);
+%plot(result(:,1), result(:,5)*180/pi);grid on;title('q R1 Robotran');hold on;
 xlim([0 tmax]);
+xlabel('Time [s]','Fontsize',14)
+ylabel('q [°]','Fontsize',14);
+
 
 % % % Happy end !
-% 
-% load handel;
-% sound(x, fe);
-
-
-
-
