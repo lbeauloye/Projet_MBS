@@ -12,7 +12,7 @@ data.q(data.ind_c) = 0.0;
 data.qd(data.ind_c) = 0.0;
 data.qdd(data.ind_c) = 0.0;
 
-if(t<10)
+if(t<=10)
     data.q(data.ind_c(1)) = 0.1*t^2;
     data.qd(data.ind_c(1)) = 0.1*t;
     data.qdd(data.ind_c(1)) = 0.1;

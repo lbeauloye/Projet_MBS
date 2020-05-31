@@ -1,4 +1,4 @@
-function [time] = Template_main_for_student_MBS_2020(param_in)
+function Template_main_for_student_MBS_2020(param_in)
 
 % Project Template (MECA2802 - 2020)
 format long
@@ -6,7 +6,8 @@ if nargin == 0
     param_in = 1; % If needed (input parameter(s))
 end
 
-test = input('Enter a number: ');
+%test = input('Enter a number: ');
+test = 5;
 global data i % Global structure that contains all the data (data.m, data.d, data.g, ...)
 
 %[data] = load_data; % Loading of the data from the data file (up to you!)
@@ -16,6 +17,7 @@ global data i % Global structure that contains all the data (data.m, data.d, dat
 
 
 
+%% Geometry, definition of the generalized coordinates and parameters of the system
 
 syms q1 q2 q3 q4 q5 q6 q7 q8 q9 qd1 qd2 qd3 qd4 qd5 qd6 qd7 qd8 qd9;
 
@@ -157,7 +159,7 @@ switch test
         data.d(:,7,8) = [0,0,0];
         data.d(:,8,8) = [0,0,1.5];
         data.d(:,8,9) = [0,0,3.0];
-        data.m = [1000, 200, 0, 5, 100, 200, 0, 5, 100];
+        data.m = [1000, 200, 0, 5, 70, 200, 0, 5, 70];
         % Fext
         data.fext = zeros(3,9);
         data.lext= zeros(3,9);
@@ -166,11 +168,11 @@ switch test
         data.I(:,:,2) = [10.875 0 0; 0 151 0; 0 0 159];
         data.I(:,:,3) = [0 0 0; 0 0 0; 0 0 0];
         data.I(:,:,4) = [3.75 0 0; 0 3.75 0; 0 0 0];
-        data.I(:,:,5) = [data.m(4)*2/5 0 0; 0 data.m(4)*2/5 0; 0 0 data.m(4)*2/5];
+        data.I(:,:,5) = [0.5^2*data.m(5)*2/5 0 0; 0 0.5^2*data.m(5)*2/5 0; 0 0 0.5^2*data.m(5)*2/5];
         data.I(:,:,6) = [10.875 0 0; 0 151 0; 0 0 159];
         data.I(:,:,7) = [0 0 0; 0 0 0; 0 0 0];
         data.I(:,:,8) = [3.75 0 0; 0 3.75 0; 0 0 0];
-        data.I(:,:,9) = [data.m(4)*2/5 0 0; 0 data.m(4)*2/5 0; 0 0 data.m(4)*2/5];
+        data.I(:,:,9) = [0.5^2*data.m(5)*2/5 0 0; 0 0.5^2*data.m(5)*2/5 0; 0 0 0.5^2*data.m(5)*2/5];
         
         data.q_symb = [q1; q2; q3; q4; q5; q6; q7; q8; q9];
         data.qd_symb = [qd1; qd2; qd3; qd4; qd5; qd6; qd7; qd8; qd9];
@@ -208,7 +210,7 @@ switch test
         
 end
 
-
+%% Numeric integration
 data.dirdyn = 3;
 [data.M, data.c] =  dirdyn_symb(data.q_symb, data.qd_symb, data);
 %data.c(1,0)
@@ -220,14 +222,15 @@ y0 = [data.q(data.ind_u)' data.qd(data.ind_u)'];
 % MBS model to be programmed in the external function :
 % yd = Template_fprime_for_student_MBS_2020(t,y)
 i = 1;
-
-tspan = [0:0.01:tmax];
-data.lambda = zeros(length(tspan), 1);
+dt = 0.01;
+tspan = 0:dt:tmax;
+%data.lambda = zeros(length(tspan), 1);
 data.t = zeros(length(tspan), 1);
 tic;
- options = odeset('RelTol',1e-6);
+ options = odeset('RelTol',1e-8);
 [t, y] = ode45('Template_fprime_for_student_MBS_2020', tspan, y0, options);
 time(1) = toc;
+fprintf('Time spend on integration : %d [sec] \n',time);
 % 
 % data.dirdyn = 2;
 % tic;
@@ -241,17 +244,43 @@ time(1) = toc;
 % Plot of results ...
 % 
 
+%% Plots of the results
+
+Q = 1; % Indice of the joint observed in matlab
+QR = 4; % Indice of the joint observed in Robotran
+
 figure;
 subplot(2,1,1)
-plot(t, y(:,1)*180/pi,'b','Linewidth',2);grid on;title('q R1','Fontsize',14);hold on;
+plot(t, y(:,Q)*180/pi,'b','Linewidth',2);grid on;title('q R1','Fontsize',14);hold on;
 xlabel('Time [s]','Fontsize',14)
 ylabel('q [°]','Fontsize',14);
 subplot(2,1,2)
-plot(t, y(:,2)*180/pi,'b','Linewidth',2);grid on;title('q R2','Fontsize',14);
-%plot(result(:,1), result(:,5)*180/pi);grid on;title('q R1 Robotran');hold on;
+plot(t, result(:,QR)*180/pi,'b','Linewidth',2);grid on;title('q R1 robotran','Fontsize',14);
 xlim([0 tmax]);
 xlabel('Time [s]','Fontsize',14)
 ylabel('q [°]','Fontsize',14);
+
+%% Error Analysis
+
+Error = zeros(tmax/dt+1,2);
+Error(:,1) = t;
+Error(:,2) = result(:,QR) - y(:,Q);
+figure;
+plot(t, Error(:,2),'b','Linewidth',2);grid on;title('Error on q1','Fontsize',14);hold on;
+xlabel('Time [s]','Fontsize',14)
+ylabel('Error [°]','Fontsize',14);
+
+Error_max = max(abs((result(:,QR)-y(:,Q))));
+t_error_max = find(abs((result(:,QR)-y(:,Q)))==Error_max);
+Error_max_in_Pourcent = 100*(result(t_error_max,QR)-y(t_error_max,Q))/(result(t_error_max,QR));
+fprintf('Error_max_in_Pourcent : %d %% \n', Error_max_in_Pourcent);
+
+MSE = 0;
+for i = 1:tmax/dt+1
+    MSE = MSE+(result(i,QR)-y(i,Q))^2;
+end
+MSE = MSE/(tmax/dt+1);
+fprintf('MSE : %d [rad^2] \n',MSE);
 
 
 % % % Happy end !
