@@ -52,11 +52,8 @@ Muc = M(data.ind_u, data.ind_c);
 Mcu = M(data.ind_c, data.ind_u);
 Mcc = M(data.ind_c, data.ind_c);
 
-qdd_u = Muu\(Fu-Muc*data.qdd(data.ind_c));
-
 data.t(i) = t;
-lambda = (Mcu*qdd_u + Mcc*data.qdd(data.ind_c) - Fc);
-data.lambda(i) = lambda(1);
+data.lambda(i) = (Mcu*data.qdd(data.ind_u) + Mcc*data.qdd(data.ind_c) + Fc)';
 i = i + 1;
 
 % Variable substitution (from  MBS to Integrator)
@@ -67,5 +64,5 @@ i = i + 1;
 % plot(t, Mcu*data.qdd(data.ind_u) + Mcc*data.qdd(data.ind_c) + Fc , '*'); hold on
 % drawnow;
 
-yp = [y(data.Nu+1:end) ; qdd_u];
+yp = [y(data.Nu+1:end) ; (Muu\(Fu-Muc*data.qdd(data.ind_c)))];
 %yp = [y(data.N+1:end) ; (M\F)];
