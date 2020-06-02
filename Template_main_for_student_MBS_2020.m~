@@ -180,9 +180,8 @@ switch test
         data.q = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.4; 0.0]; 
         data.qd = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0]; 
         data.qdd = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0];
-        tmax = 30;
-        %result = load('/Users/vermeulenlucas/Documents/MBProjects/Simple_manege/resultsR/dirdyn_q.res');
-        result = load('/Users/LB/Downloads/Simple_manege/resultsR/dirdyn_Qc.res');
+        tmax = 25;
+        result = load('/Users/vermeulenlucas/Documents/MBProjects/Simple_manege/resultsR/dirdyn_Qc.res');
         
     otherwise 
         
@@ -208,15 +207,13 @@ switch test
         data.qd = [0.0; 0.0]; % ...
         data.qdd = [0.0; 0.0];
         tmax = 5;
-        result = load('/Users/LB/Documents/Job/mbsysc/ExampleProjects/TutorialProjects/modellingFeatures/1_Bodies_and_Joints/resultsR/dirdyn_Qq.res');
+        result = load('/Users/LB/Documents/Job/mbsysc/ExampleProjects/TutorialProjects/modellingFeatures/1_Bodies_and_Joints/resultsR/dirdyn_q.res');
         
 end
 
 %% Numeric integration
 data.dirdyn = 3;
-tic;
 [data.M, data.c] =  dirdyn_symb(data.q_symb, data.qd_symb, data);
-toc;
 %data.c(1,0)
 % Variable substitution for an order-1 integrator (ode45)
 % 
@@ -228,10 +225,10 @@ y0 = [data.q(data.ind_u)' data.qd(data.ind_u)'];
 i = 1;
 dt = 0.01;
 tspan = 0:dt:tmax;
-data.lambda = zeros(length(tspan),length(data.ind_c));
+data.lambda = zeros(length(tspan), data.Nc);
 data.t = zeros(length(tspan), 1);
 tic;
- options = odeset('RelTol',1e-6);
+ options = odeset('RelTol',1e-8);
 [t, y] = ode45('Template_fprime_for_student_MBS_2020', tspan, y0, options);
 time(1) = toc;
 fprintf('Time spend on integration : %d [sec] \n',time);
@@ -250,89 +247,56 @@ fprintf('Time spend on integration : %d [sec] \n',time);
 
 %% Plots of the results
 
-QM = 2; % Indice of the joint observed in matlab
-QR = 3; % Indice of the joint observed in Robotran
+Q = 3; % Indice of the joint observed in matlab
+QR = 4; % Indice of the joint observed in Robotran
 
 figure;
 subplot(2,1,1)
-%plot(t, (y(:,1))*180/pi,'b','Linewidth',2);grid on;title('q R1','Fontsize',14);hold on;
 
 % q(i) plot on Matlab
-% plot(t, y(:,Q)*180/pi,'b','Linewidth',2);grid on;title('q R1','Fontsize',14);hold on;
-% xlabel('Time [s]','Fontsize',14)
-% ylabel('q [°]','Fontsize',14);
+plot(t, y(:,Q)*180/pi,'b','Linewidth',2);grid on;title('q R1','Fontsize',14);hold on;
+xlabel('Time [s]','Fontsize',14)
+ylabel('q [°]','Fontsize',14);
 
 % Force/Torque plot on Matlab
-plot(t, data.lambda(:,2),'b','Linewidth',2);grid on;title('Couple R3','Fontsize',14);hold on;
-
-xlabel('Time [s]','Fontsize',14)
-ylabel('Couple [N.m]','Fontsize',14);
+% plot(t, data.lambda(:,Q),'b','Linewidth',2);grid on;title('Couple R3','Fontsize',14);hold on;
+% xlabel('Time [s]','Fontsize',14)
+% ylabel('Couple [N.m]','Fontsize',14);
 
 subplot(2,1,2)
-%plot(t, (y(:,2))*180/pi,'b','Linewidth',2);grid on;title('q R2','Fontsize',14);
-%plot(result(:,1), result(:,5)*180/pi);grid on;title('q R1 Robotran');hold on;
+
 % q(i)  plot on Robotran
-% plot(t, result(:,QR)*180/pi,'b','Linewidth',2);grid on;title('q R1 robotran','Fontsize',14);
-% xlabel('Time [s]','Fontsize',14)
-% ylabel('q [°]','Fontsize',14);
+plot(t, result(:,QR)*180/pi,'b','Linewidth',2);grid on;title('q R1 robotran','Fontsize',14);
+xlabel('Time [s]','Fontsize',14)
+ylabel('q [°]','Fontsize',14);
 
 % Force/Torque plot on Robotran
-plot(t, result(:,QR),'b','Linewidth',2);grid on;title('Couple R3 robotran','Fontsize',14);
-xlabel('Time [s]','Fontsize',14)
-ylabel('Couple [N.m]','Fontsize',14);
-xlim([0 tmax]);
+% plot(t, result(:,QR),'b','Linewidth',2);grid on;title('Couple R3 robotran','Fontsize',14);
+% xlabel('Time [s]','Fontsize',14)
+% ylabel('Couple [N.m]','Fontsize',14);
+% xlim([0 tmax]);
 
 %% Error Analysis
 
 Error = zeros(tmax/dt+1,2);
 Error(:,1) = t;
-Error(:,2) = result(:,QR) - y(:,QM);
+Error(:,2) = result(:,QR) - y(:,Q);
 figure;
 plot(t, Error(:,2),'b','Linewidth',2);grid on;title('Error on q1','Fontsize',14);hold on;
 xlabel('Time [s]','Fontsize',14)
 ylabel('Error [°]','Fontsize',14);
 
-Error_max = max(abs((result(:,QR)-y(:,QM))));
-t_error_max = find(abs((result(:,QR)-y(:,QM)))==Error_max);
-Error_max_in_Pourcent = 100*(result(t_error_max,QR)-y(t_error_max,QM))/(result(t_error_max,QR));
+Error_max = max(abs((result(:,QR)-y(:,Q))));
+t_error_max = find(abs((result(:,QR)-y(:,Q)))==Error_max);
+Error_max_in_Pourcent = 100*(result(t_error_max,QR)-y(t_error_max,Q))/(result(t_error_max,QR));
 fprintf('Error max in Pourcent : %d %% \n', Error_max_in_Pourcent);
 
 MSE = 0;
 for i = 1:tmax/dt+1
-    MSE = MSE+(result(i,QR)-y(i,QM))^2;
+    MSE = MSE+(result(i,QR)-y(i,Q))^2;
 end
 MSE = MSE/(tmax/dt+1);
 fprintf('MSE : %d [rad^2] \n',MSE);
-% 
-% 
-% figure;
-% plot(data.t, data.lambda(:,3)); hold on
-% plot(result(:,1), result(:,6));
-% 
-% figure;
-% %plot(data.t, data.lambda); hold on
-% plot(result(:,1), result(:,2));
-% 
-% figure;
-% %plot(data.t, data.lambda); hold on
-% plot(result(:,1), result(:,3));
-% 
-% figure;
-% %plot(data.t, data.lambda); hold on
-% plot(result(:,1), result(:,7));
-% 
-% figure;
-% %plot(data.t, data.lambda); hold on
-% plot(result(:,1), result(:,10));
-% % figure;
-% % %plot(data.t, data.lambda); hold on
-% % plot(result(:,1), result(:,6));
-% figure;
-% 
-% plot(data.t, data.lambda(:,4));
-% 
-% figure;
-% plot(data.t, data.lambda(:,5));
 
 
 % % % Happy end !

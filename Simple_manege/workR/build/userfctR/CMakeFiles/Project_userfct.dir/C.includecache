@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/vermeulenlucas/.robotran/mbsysc/MBsysC/mbs_common/../mbs_common/mbs_struct/mbs_data.h
+stdio.h
+/Users/vermeulenlucas/.robotran/mbsysc/MBsysC/mbs_common/../mbs_common/mbs_struct/stdio.h
+stdlib.h
+/Users/vermeulenlucas/.robotran/mbsysc/MBsysC/mbs_common/../mbs_common/mbs_struct/stdlib.h
+mbs_user_interface.h
+/Users/vermeulenlucas/.robotran/mbsysc/MBsysC/mbs_common/../mbs_common/mbs_struct/mbs_user_interface.h
+mbs_project_fct_ptr.h
+/Users/vermeulenlucas/.robotran/mbsysc/MBsysC/mbs_common/../mbs_common/mbs_struct/mbs_project_fct_ptr.h
+dlfcn.h
+-
+windows.h
+-
+
+/Users/vermeulenlucas/.robotran/mbsysc/MBsysC/mbs_common/../mbs_common/mbs_struct/mbs_project_fct_ptr.h
+stdint.h
+-
+
+/Users/vermeulenlucas/.robotran/mbsysc/MBsysC/mbs_common/../mbs_common/mbs_struct/mbs_user_interface.h
+
+/Users/vermeulenlucas/Documents/MBProjects/Simple_manege/userfctR/user_DrivenJoints.c
+math.h
+/Users/vermeulenlucas/Documents/MBProjects/Simple_manege/userfctR/math.h
+mbs_data.h
+/Users/vermeulenlucas/Documents/MBProjects/Simple_manege/userfctR/mbs_data.h
+
