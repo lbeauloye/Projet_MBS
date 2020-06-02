@@ -141,6 +141,38 @@ switch test
         data.joint_type = ["R3","T1","R1","R2","T3","T1","R1","R2","T3"];
         % Geometry
         data.d = zeros(3,data.N, data.N);
+%         data.d(:,1,1) = [0,0,-2.5];
+%         data.d(:,1,2) = [-0.5,0,-5.0];
+%         data.d(:,2,2) = [-1.5,0,0];
+%         data.d(:,2,3) = [-3.0,0,0.15];
+%         data.d(:,3,3) = [0,0,0];
+%         data.d(:,3,4) = [0,0,0];
+%         data.d(:,4,4) = [0,0,1.5];
+%         data.d(:,4,5) = [0,0,3.0];
+%         data.d(:,5,5) = [0,0,0];
+%         data.d(:,1,6) = [0.5,0,5.0];
+%         data.d(:,6,6) = [1.5,0,0];
+%         data.d(:,6,7) = [3.0,0,0.15];
+%         data.d(:,7,7) = [0,0,0];
+%         data.d(:,7,8) = [0,0,0];
+%         data.d(:,8,8) = [0,0,1.5];
+%         data.d(:,8,9) = [0,0,3.0];
+%         data.m = [1000, 200, 0, 5, 70, 200, 0, 5, 70];
+%         % Fext
+%         data.fext = zeros(3,9);
+%         data.lext= zeros(3,9);
+%         % Inertial matrices
+%         data.I(:,:,1) = [2145 0 0; 0 2145 0; 0 0 125];
+%         data.I(:,:,2) = [10.875 0 0; 0 151 0; 0 0 159];
+%         data.I(:,:,3) = [0 0 0; 0 0 0; 0 0 0];
+%         data.I(:,:,4) = [3.75 0 0; 0 3.75 0; 0 0 0];
+%         data.I(:,:,5) = [data.m(4)*2/5 0 0; 0 data.m(4)*2/5 0; 0 0 data.m(4)*2/5];
+%         data.I(:,:,6) = [10.875 0 0; 0 151 0; 0 0 159];
+%         data.I(:,:,7) = [0 0 0; 0 0 0; 0 0 0];
+%         data.I(:,:,8) = [3.75 0 0; 0 3.75 0; 0 0 0];
+%         data.I(:,:,9) = [data.m(4)*2/5 0 0; 0 data.m(4)*2/5 0; 0 0 data.m(4)*2/5];
+%         
+
         data.d(:,1,1) = [0,0,-2.5];
         data.d(:,1,2) = [-0.5,0,-5.0];
         data.d(:,2,2) = [-1.5,0,0];
@@ -166,11 +198,11 @@ switch test
         data.I(:,:,2) = [10.875 0 0; 0 151 0; 0 0 159];
         data.I(:,:,3) = [0 0 0; 0 0 0; 0 0 0];
         data.I(:,:,4) = [3.75 0 0; 0 3.75 0; 0 0 0];
-        data.I(:,:,5) = [data.m(4)*2/5 0 0; 0 data.m(4)*2/5 0; 0 0 data.m(4)*2/5];
+        data.I(:,:,5) = [0.5^2*data.m(5)*2/5 0 0; 0 0.5^2*data.m(5)*2/5 0; 0 0 0.5^2*data.m(5)*2/5];
         data.I(:,:,6) = [10.875 0 0; 0 151 0; 0 0 159];
         data.I(:,:,7) = [0 0 0; 0 0 0; 0 0 0];
         data.I(:,:,8) = [3.75 0 0; 0 3.75 0; 0 0 0];
-        data.I(:,:,9) = [data.m(4)*2/5 0 0; 0 data.m(4)*2/5 0; 0 0 data.m(4)*2/5];
+        data.I(:,:,9) = [0.5^2*data.m(5)*2/5 0 0; 0 0.5^2*data.m(5)*2/5 0; 0 0 0.5^2*data.m(5)*2/5];
         
         data.q_symb = [q1; q2; q3; q4; q5; q6; q7; q8; q9];
         data.qd_symb = [qd1; qd2; qd3; qd4; qd5; qd6; qd7; qd8; qd9];
@@ -179,7 +211,7 @@ switch test
         data.qdd = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0];
         tmax = 30;
         %result = load('/Users/vermeulenlucas/Documents/MBProjects/Simple_manege/resultsR/dirdyn_q.res');
-        result = load('/Users/LB/Downloads/Simple_manege/resultsR/dirdyn_q.res');
+        result = load('/Users/LB/Downloads/Simple_manege/resultsR/dirdyn_Qc.res');
         
     otherwise 
         
@@ -225,7 +257,7 @@ y0 = [data.q(data.ind_u)' data.qd(data.ind_u)'];
 i = 1;
 
 tspan = [0:0.01:tmax];
-data.lambda = zeros(length(tspan), 1);
+data.lambda = zeros(length(tspan), length(data.ind_c));
 data.t = zeros(length(tspan), 1);
 tic;
  options = odeset('RelTol',1e-6);
@@ -256,12 +288,35 @@ xlim([0 tmax]);
 xlabel('Time [s]','Fontsize',14)
 ylabel('q [°]','Fontsize',14);
 
-figure;
-%plot(data.t, data.lambda); hold on
-plot(result(:,1), result(:,5));
 
 figure;
-plot(t, (y(:,2)-result(:,5))*180/pi);
+plot(data.t, data.lambda(:,3)); hold on
+plot(result(:,1), result(:,6));
+
+figure;
+%plot(data.t, data.lambda); hold on
+plot(result(:,1), result(:,2));
+
+figure;
+%plot(data.t, data.lambda); hold on
+plot(result(:,1), result(:,3));
+
+figure;
+%plot(data.t, data.lambda); hold on
+plot(result(:,1), result(:,7));
+
+figure;
+%plot(data.t, data.lambda); hold on
+plot(result(:,1), result(:,10));
+% figure;
+% %plot(data.t, data.lambda); hold on
+% plot(result(:,1), result(:,6));
+figure;
+
+plot(data.t, data.lambda(:,4));
+
+figure;
+plot(data.t, data.lambda(:,5));
 
 
 % % % Happy end !

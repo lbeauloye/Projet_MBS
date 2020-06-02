@@ -57,7 +57,7 @@ qdd_u =  (Muu\(Fu-Muc*data.qdd(data.ind_c)));
 
 data.t(i) = t;
 lambda = Mcu*qdd_u + Mcc*data.qdd(data.ind_c) - Fc;
-data.lambda(i) = lambda(1);
+data.lambda(i,:) = lambda';
 i = i + 1;
 
 % Variable substitution (from  MBS to Integrator)
