@@ -157,7 +157,7 @@ switch test
         data.d(:,7,8) = [0,0,0];
         data.d(:,8,8) = [0,0,1.5];
         data.d(:,8,9) = [0,0,3.0];
-        data.m = [1000, 200, 0, 5, 100, 200, 0, 5, 100];
+        data.m = [1000, 200, 0, 5, 70, 200, 0, 5, 70];
         % Fext
         data.fext = zeros(3,9);
         data.lext= zeros(3,9);
@@ -177,8 +177,9 @@ switch test
         data.q = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.4; 0.0]; 
         data.qd = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0]; 
         data.qdd = [0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0];
-        tmax = 25;
-        result = load('/Users/vermeulenlucas/Documents/MBProjects/Simple_manege/resultsR/dirdyn_q.res');
+        tmax = 30;
+        %result = load('/Users/vermeulenlucas/Documents/MBProjects/Simple_manege/resultsR/dirdyn_q.res');
+        result = load('/Users/LB/Downloads/Simple_manege/resultsR/dirdyn_q.res');
         
     otherwise 
         
@@ -204,13 +205,15 @@ switch test
         data.qd = [0.0; 0.0]; % ...
         data.qdd = [0.0; 0.0];
         tmax = 5;
-        result = load('/Users/LB/Documents/Job/mbsysc/ExampleProjects/TutorialProjects/modellingFeatures/1_Bodies_and_Joints/resultsR/dirdyn_q.res');
+        result = load('/Users/LB/Documents/Job/mbsysc/ExampleProjects/TutorialProjects/modellingFeatures/1_Bodies_and_Joints/resultsR/dirdyn_Qq.res');
         
 end
 
 
 data.dirdyn = 3;
+tic;
 [data.M, data.c] =  dirdyn_symb(data.q_symb, data.qd_symb, data);
+toc;
 %data.c(1,0)
 % Variable substitution for an order-1 integrator (ode45)
 % 
@@ -243,15 +246,22 @@ time(1) = toc;
 
 figure;
 subplot(2,1,1)
-plot(t, y(:,1)*180/pi,'b','Linewidth',2);grid on;title('q R1','Fontsize',14);hold on;
+plot(t, (y(:,1))*180/pi,'b','Linewidth',2);grid on;title('q R1','Fontsize',14);hold on;
 xlabel('Time [s]','Fontsize',14)
 ylabel('q [°]','Fontsize',14);
 subplot(2,1,2)
-plot(t, y(:,2)*180/pi,'b','Linewidth',2);grid on;title('q R2','Fontsize',14);
+plot(t, (y(:,2))*180/pi,'b','Linewidth',2);grid on;title('q R2','Fontsize',14);
 %plot(result(:,1), result(:,5)*180/pi);grid on;title('q R1 Robotran');hold on;
 xlim([0 tmax]);
 xlabel('Time [s]','Fontsize',14)
 ylabel('q [°]','Fontsize',14);
+
+figure;
+%plot(data.t, data.lambda); hold on
+plot(result(:,1), result(:,5));
+
+figure;
+plot(t, (y(:,2)-result(:,5))*180/pi);
 
 
 % % % Happy end !
