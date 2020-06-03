@@ -1,5 +1,11 @@
 function [M, c] = dirdyn(q, qd, data)
 
+
+
+%%% This function computes M and c according to 
+%%% the formalism given in the reference book
+
+
 % Forward Kinematics
 
 

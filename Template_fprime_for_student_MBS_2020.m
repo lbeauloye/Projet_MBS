@@ -21,18 +21,17 @@ else
     data.qd(data.ind_c(1)) = 0.1*10;
     data.qdd(data.ind_c(1)) = 0.0;
 end
+
+
 % Q vector
 
-%[Q] = Joint_forces(data.q, data.qd, data); % up to you : function 'Joint_forces' to program (if needed)
-%size(data.q)
-
-Q = zeros(data.N, 1);%[0;0];
-% Q(4) = -(100*(data.q(4))+1000*data.qd(4)); %% Damping
-% Q(3) = -(100*(data.q(3))+1000*data.qd(3)); %% Damping
-% Q(7) = -(100*(data.q(7))+1000*data.qd(7)); %% Damping
-% Q(8) = -(100*(data.q(8))+1000*data.qd(8)); %% Damping
-
-%Q = zeros(data.N, 1);%[0;0];
+Q = zeros(data.N, 1);
+if data.damper
+    Q(4) = -(100*(data.q(4))+1000*data.qd(4)); %% Damping
+    Q(3) = -(100*(data.q(3))+1000*data.qd(3)); %% Damping
+    Q(7) = -(100*(data.q(7))+1000*data.qd(7)); %% Damping
+    Q(8) = -(100*(data.q(8))+1000*data.qd(8)); %% Damping
+end
 
 % Mass matrix M and c term
 
@@ -56,18 +55,15 @@ Mcc = M(data.ind_c, data.ind_c);
 
 qdd_u = Muu\(Fu-Muc*data.qdd(data.ind_c));
 
+
+% Lambda computation
 data.t(i) = t;
 lambda = Mcu*qdd_u + Mcc*data.qdd(data.ind_c) - Fc;
 data.lambda(i,:) = lambda';
 i = i + 1;
 
+
+
 % Variable substitution (from  MBS to Integrator)
 
-% yp(1:data.N) = y(data.N+1:end);
-% yp(3:4) = (M\F); % solution of linear system ("Ax = b")
-% figure(2);
-% plot(t, Mcu*data.qdd(data.ind_u) + Mcc*data.qdd(data.ind_c) + Fc , '*'); hold on
-% drawnow;
-
 yp = [y(data.Nu+1:end) ; qdd_u];
-%yp = [y(data.N+1:end) ; (M\F)];
