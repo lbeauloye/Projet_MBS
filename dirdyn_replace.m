@@ -144,12 +144,3 @@ end
 function [u_tilde] = tilde(u)
 u_tilde = [0, -u(3), u(2); u(3), 0, -u(1); -u(2), u(1), 0];
 end 
-
-function [delta] = delta_kron(m,n)
-if(m==n)
-    delta = 1;
-else 
-    delta = 0;
-end
-
-end

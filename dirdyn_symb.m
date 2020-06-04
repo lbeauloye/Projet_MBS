@@ -1,13 +1,9 @@
 function [M, c] = dirdyn_symb(q, qd, data)
 
-
 %%% This function computes M and c SYMBOLICALLY according to 
 %%% the formalism given in the reference book
 
-
-% Forward Kinematics
-
-
+%% Forward Kinematics
 
 % Allocation
 w = sym(zeros(3, data.N));
@@ -17,13 +13,7 @@ alpha_c = sym(zeros(3, data.N));
 O_M = sym(zeros(3,data.N, data.N));
 A_M =  sym(zeros(3,data.N, data.N));
 
-
-% Initial coniditions
-
-%alpha_c_0 = -data.g;
-
-% loops
-
+% Recursion
 for i = 1:data.N
     h = data.inbody(i);
     R_ih = Rot(data,i,q).';
@@ -57,8 +47,7 @@ for i = 1:data.N
     end    
 end
 
-% Backward Dynamics 
-
+%% Backward Dynamics 
 
 % Allocation 
 W_c = sym(zeros(3, data.N));
@@ -68,7 +57,7 @@ W_M = sym(zeros(3, data.N, data.N));
 F_M = sym(zeros(3, data.N, data.N));
 L_M = sym(zeros(3, data.N, data.N));
 
-
+% Recursion
 for i = data.N:-1:1
     psi = Psi(data,i);
     W_c(:,i) = data.m(i)*(alpha_c(:,i) + beta_c(:,:,i)*(q(i)*psi+data.d(:,i,i))) ...
@@ -97,12 +86,13 @@ for i = data.N:-1:1
     end
 end
 
-% Projection 
-c = sym(zeros(data.N, 1));
+%% Projection 
 
+% Allocation 
+c = sym(zeros(data.N, 1));
 M = sym(zeros(data.N, data.N));
 
-
+% Recursion
 for i = 1:data.N
     phi = Phi(data,i);
     psi = Psi(data,i);
@@ -114,7 +104,6 @@ for i = 1:data.N
         end
     end
 end
-
 
 M = matlabFunction(M, 'Vars', {[q]});
 c = matlabFunction(c, 'Vars', {[q , qd]});
@@ -132,7 +121,6 @@ elseif(strcmp(data.joint_type(i),'R3'))
 else 
     R = eye(3,3);
 end
-
 
 end
 

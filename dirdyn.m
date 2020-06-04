@@ -1,14 +1,10 @@
 function [M, c] = dirdyn(q, qd, data)
 
-
-
 %%% This function computes M and c according to 
 %%% the formalism given in the reference book
 
 
-% Forward Kinematics
-
-
+%% Forward Kinematics
 
 % Allocation
 w = zeros(3, data.N);
@@ -18,8 +14,7 @@ alpha_c = zeros(3, data.N);
 O_M = zeros(3,data.N, data.N);
 A_M =  zeros(3,data.N, data.N);
 
-% loops
-
+% Recursion
 for i = 1:data.N
     h = data.inbody(i);
     R_ih = Rot(data,i,q)';
@@ -53,8 +48,7 @@ for i = 1:data.N
     end  
 end
 
-% Backward Dynamics 
-
+%% Backward Dynamics 
 
 % Allocation 
 W_c = zeros(3, data.N);
@@ -64,7 +58,7 @@ W_M = zeros(3, data.N, data.N);
 F_M = zeros(3, data.N, data.N);
 L_M = zeros(3, data.N, data.N);
 
-
+% Recursion
 for i = data.N:-1:1
     psi = Psi(data,i);
     W_c(:,i) = data.m(i)*(alpha_c(:,i) + beta_c(:,:,i)*(q(i)*psi+data.d(:,i,i))) ...
@@ -93,12 +87,12 @@ for i = data.N:-1:1
     end
 end
 
-% Projection 
-c = zeros(data.N, 1);
 
+%% Projection 
+c = zeros(data.N, 1);
 M = zeros(data.N, data.N);
 
-
+% Recursion
 for i = 1:data.N
     phi = Phi(data,i);
     psi = Psi(data,i);
@@ -126,7 +120,6 @@ elseif(strcmp(data.joint_type(i),'R3'))
 else 
     R = eye(3,3);
 end
-
 
 end
 
